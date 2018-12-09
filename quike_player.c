@@ -38,7 +38,7 @@ void qkPlayerSetGlobalPlayer(QKPlayer * const player)
 }
 
 
-#define QK_PLAYER_FORWARD_SPEED 10000.
+#define QK_PLAYER_FORWARD_SPEED 20000.
 #define QK_PLAYER_LATERAL_SPEED 10000.
 
 #define QK_PLAYER_HORIZONTAL_ANGULAR_SPEED 0.01

@@ -2,8 +2,8 @@
 
 
 all: *.c
-	gcc -o QUIKE $^ -lm -lGL -lGLU -lglut
+	gcc -o QUIKE -O3 $^ -lm -lGL -lGLU -lglut
 
 	
 run: all
-	./QUIKE
+	./QUIKE map.bmp

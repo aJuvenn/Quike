@@ -20,7 +20,56 @@ void qkLoadNewMap(const unsigned xSize, const unsigned ySize)
 }
 
 
-QKMapCell qkCellType(const unsigned x, const unsigned y)
+
+
+void qkMapSetCellType(const QKMapCell type, const unsigned x, const unsigned y)
+{
+	if (x >= qkGlobalMap.xSize || y >= qkGlobalMap.ySize){
+		return;
+	}
+
+	qkGlobalMap.cells[x + qkGlobalMap.xSize * y] = type;
+}
+
+int qkLoadNewMapFromBitmap(const char * const bitmapPath)
+{
+	printf("a\n");
+
+	QKPicture * pic = qkPictureLoadFromBitmap(bitmapPath);
+
+	if (pic == NULL){
+		return EXIT_FAILURE;
+	}
+
+	size_t width = pic->width;
+	size_t height = pic->height;
+
+	qkLoadNewMap(width, height);
+
+	for (unsigned x = 0 ; x < width ; x++){
+		for (unsigned y = 0 ; y < height ; y++){
+
+			QKColor c = pic->pixels[height - 1 - y][x];
+
+			if (qkColorAreEquals(c, QK_COLOR_BLACK)){
+				qkMapSetCellType(QK_WALL_CELL, x, y);
+			} else if (qkColorAreEquals(c, QK_COLOR_WHITE)){
+				qkMapSetCellType(QK_FLOOR_CELL, x, y);
+			} else {
+				qkMapSetCellType(QK_NONE_CELL, x, y);
+			}
+		}
+	}
+
+	qkPictureFree(pic);
+
+	return EXIT_SUCCESS;
+}
+
+
+
+
+QKMapCell qkMapCellType(const unsigned x, const unsigned y)
 {
 	if (x >= qkGlobalMap.xSize || y >= qkGlobalMap.ySize){
 		return QK_NONE_CELL;
@@ -44,7 +93,7 @@ QKMapCell qkCellTypef(const GLfloat x, const GLfloat y)
 		nearestY = 0;
 	}
 
-	return qkCellType((unsigned) nearestX, (unsigned) nearestY);
+	return qkMapCellType((unsigned) nearestX, (unsigned) nearestY);
 }
 
 
@@ -61,7 +110,7 @@ void qkDrawMap()
 	for (unsigned x = 0 ; x < qkGlobalMap.xSize ; x++){
 		for (unsigned y = 0 ; y < qkGlobalMap.ySize ; y++){
 
-			switch (qkCellType(x, y)){
+			switch (qkMapCellType(x, y)){
 
 			case QK_FLOOR_CELL:
 				qkDrawFloor(x, y);

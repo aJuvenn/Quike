@@ -18,6 +18,7 @@
 
 
 #include "quike_utils.h"
+#include "quike_picture.h"
 #include "quike_draw.h"
 #include "quike_vector_algebra.h"
 

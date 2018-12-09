@@ -33,7 +33,11 @@ QKMap qkGlobalMap;
 
 void qkLoadNewMap(const unsigned xSize, const unsigned ySize);
 
-QKMapCell qkCellType(const unsigned x, const unsigned y);
+int qkLoadNewMapFromBitmap(const char * const bitmapPath);
+
+QKMapCell qkMapCellType(const unsigned x, const unsigned y);
+
+void qkMapSetCellType(const QKMapCell type, const unsigned x, const unsigned y);
 
 void qkFreeGlobalMap();
 
