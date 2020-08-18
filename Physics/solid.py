@@ -41,9 +41,9 @@ def rotation_matrix_from_quaternion(q):
     c2 = c * c
     d2 = d * d
     
-    return npmat.asmatrix([[a2 + b2 - c2 - d2, 2.*(b*c - a*d), 2.*(a*c + b*d)],
-                            [2.*(a*d + b*c), a2 - b2 + c2 - d2, 2.*(c*d - a*b)],
-                            [2.*(b*d - a*c), 2.*(a*b + c*d), a2 - b2 - c2 + d2]])
+    return npmat.asmatrix([[a2 + b2 - c2 - d2, 2.*(b*c - a*d)   , 2.*(a*c + b*d)],
+                           [2.*(a*d + b*c)   , a2 - b2 + c2 - d2, 2.*(c*d - a*b)],
+                           [2.*(b*d - a*c)   , 2.*(a*b + c*d)   , a2 - b2 - c2 + d2]])
     
     
 
@@ -102,9 +102,20 @@ class Solid:
         self.initial_inertia_matrix = Solid._inertia_matrix(self.masses, self.centered_initial_points_hstack)
         self.initial_inertia_matrix_inverse = npmat.linalg.pinv(self.initial_inertia_matrix)
         
-        # Rotation quaternion (used to represent object orientation) and angular momentum (sigma) 
+        # Rotation quaternion (used to construct matrix representing orientation) and angular momentum (sigma) 
         self.rotation_quaternion = Vect([1.,0.,0.,0.])
+        self.rotation_matrix = rotation_matrix_from_quaternion(self.rotation_quaternion)
         self.angular_momentum = npmat.zeros((3,1))
+        
+        self._compute_AABB()
+        
+        
+        
+    def _compute_AABB(self):
+        points = self.points_hstack()
+        self.AABB = npmat.hstack([points.min(axis = 1), points.max(axis = 1)])
+        #npmat.vstack([points.min(axis = 1).T, points.max(axis = 1).T])
+        
       
         
     @staticmethod
@@ -122,7 +133,7 @@ class Solid:
         return output
             
     
-    def update_center_position(self, total_force, dt):
+    def _update_position(self, total_force, dt):
         """
             Integrates velocity and position for a time step dt if the sum
             of every forces is provided
@@ -133,7 +144,7 @@ class Solid:
         self.center_position += dt * self.center_velocity
     
     
-    def update_rotation_quaternion(self, total_force_moment, dt):
+    def _update_orientation(self, total_force_moment, dt):
         """
             Integrates the provided force momentum to change angular momentum,
             uses solid inertia to compute the angular speed and uses it to
@@ -146,8 +157,8 @@ class Solid:
         self.angular_momentum += dt * total_force_moment
         
         # Rotation matrix corresponding to the current object angle
-        R = rotation_matrix_from_quaternion(self.rotation_quaternion)
-        
+        R = self.rotation_matrix 
+
         # Inertia matrix inverse is obtained from the initial one by a change of bases
         current_inertia_matrix_inverse = R * self.initial_inertia_matrix_inverse * R.T
         
@@ -161,6 +172,16 @@ class Solid:
         # Normalization of the quaternion to ensure numerical stability through time steps
         self.rotation_quaternion /= npmat.linalg.norm(self.rotation_quaternion)
         
+        # Update of the rotation matrix from the new quaternion
+        self.rotation_matrix = rotation_matrix_from_quaternion(self.rotation_quaternion)
+        
+        
+    def update(self, total_force, total_force_moment, dt):
+        
+        self._update_position(total_force, dt)
+        self._update_orientation(total_force_moment, dt)
+        self._compute_AABB()
+        
         
     def points_hstack(self):
         """
@@ -168,14 +189,42 @@ class Solid:
             of the material points in the solid
         """
         
-        # The rotation matrix is computed from the quaternion 
-        R = rotation_matrix_from_quaternion(self.rotation_quaternion)
-        
         # Centered points are obtained by a rotation of the original ones
-        current_centered_points_hstack = R * self.centered_initial_points_hstack 
+        current_centered_points_hstack = self.rotation_matrix * self.centered_initial_points_hstack 
         
         # The center of mass position is added to have the actual position
         return current_centered_points_hstack + self.center_position
+        
+    
+    def AABB_intersect_with(self, other_solid):
+        
+        AABB = self.AABB
+        other_AABB = other_solid.AABB
+        
+        for i in range(3):
+            if not ((other_AABB[i, 0] <= AABB[i, 0] <= other_AABB[i, 1]) 
+                    or (AABB[i, 0] <= other_AABB[i, 0] <= AABB[i, 1])):
+                return False
+            
+        return True
+    
+    
+    def AABB_corners(self):
+        
+        AABB = self.AABB
+        output = npmat.empty((3, 8))
+        
+        i = 0
+        
+        for x_i in range(2):
+            for y_i in range(2):
+                for z_i in range(2):
+                    output[0, i] = AABB[0, x_i]
+                    output[1, i] = AABB[1, y_i]
+                    output[2, i] = AABB[2, z_i]
+                    i += 1
+                    
+        return output
         
     
     def print(self):
@@ -200,6 +249,9 @@ class Solid:
         print("Rotation quaternion:")
         pprint(self.rotation_quaternion)
         
+        print("Rotation matrix:")
+        pprint(self.rotation_matrix)
+        
         print("Angular momentum (sigma):")
         pprint(self.angular_momentum)
         
@@ -212,5 +264,12 @@ class Solid:
         print("Inertia matrix times inertia matrix inverse:")
         pprint(self.initial_inertia_matrix * self.initial_inertia_matrix_inverse)
  
+    
+        
+        print("--------------------------")
+    
+        print("Axis Aligned Bounding Box (AABB):")
+        pprint(self.AABB)
+    
         print("--------------------------")
         print("--------------------------")

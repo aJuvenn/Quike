@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from solid import Solid
 from box_collision import BoxCollisionDetector
+import cProfile
 
 ux = np.array([1.,0.,0.])
 uy = np.array([0.,1.,0.])
@@ -73,9 +71,9 @@ def rectangle_points(AABB):
     return np.array(points)
 
   
-D = 10
+D = 200
     
-nb_solids = 30
+nb_solids = 10000
 solids = []
 forces = []
 force_moments = []
@@ -98,87 +96,21 @@ collision_detector = BoxCollisionDetector(solids)
 
 
 
-dt = 0.01
-T = 1.
 
-
-fig = plt.figure()
-ax = fig.add_subplot(1,1,1,projection='3d')
-
-ax.set_xlim3d(-D, D)
-ax.set_ylim3d(-D, D)
-ax.set_zlim3d(-D, D)
-
-
-previous_plots = nb_solids * [None]
-previous_AABB_plots = nb_solids * [None]
-
-previous_u_plot = None
-
-
-def update(t):
+def sim(solids, forces, force_moments, nb_steps, dt):
     
-    global previous_plots
-    global previous_AABB_plots
-    global previous_u_plot
-    global ax
+    for t in range(nb_steps):
     
-    for i, s in enumerate(solids):
-        s.update(forces[i], force_moments[i], dt)
-        
-    print(collision_detector.colliding_boxes())
-    
-    if previous_u_plot is not None:
-        previous_u_plot.remove()
-        
-    u = collision_detector.get_u()
-    previous_u_plot = ax.quiver(0, 0, 0, 
-                                u[0,0], u[1,0], u[2,0], 
-                                length = 5, 
-                                normalize = False, 
-                                color = 'blue')
-    
-    
-    for i, s in enumerate(solids):  
-        
-        points_hstack = s.points_hstack()
-        
-        if previous_plots[i] is not None:
-            previous_plots[i][0].remove()
-        
-        if previous_AABB_plots[i] is not None:
-            previous_AABB_plots[i][0].remove()
-
-    
-        previous_plots[i] = ax.plot3D(Array(points_hstack[0, :]), 
-                                       Array(points_hstack[1, :]),
-                                       Array(points_hstack[2, :]),
-                                       color = 'black')
-        
-        rect_points = rectangle_points(s.AABB)
-    
-        collision_color = 'green'
-        
-        for j, s2 in enumerate(solids):
-            if i == j:
-                continue
-            if s.AABB_intersect_with(s2):
-                collision_color = 'red'
-                break
+        for i, s in enumerate(solids):
+            s.update(forces[i], force_moments[i], dt)
             
-        previous_AABB_plots[i] = ax.plot3D(rect_points[:, 0],
-                                            rect_points[:, 1],
-                                            rect_points[:, 2],
-                                            color = collision_color,
-                                            linewidth = 1)
+        print(collision_detector.colliding_boxes())
     
     
+dt = 0.01    
+nb_steps = 15
 
-ani = FuncAnimation(fig, update, 
-                    frames = np.arange(0., T, dt), 
-                    interval=20)
-        
-plt.show()
+cProfile.run('sim(solids, forces, force_moments, nb_steps, dt)', sort = 'cumulative')
 
 
 
