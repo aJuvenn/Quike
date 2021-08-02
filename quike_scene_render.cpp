@@ -6,7 +6,7 @@
  */
 
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 void qkWindowReshapeHandler(int w, int h)
@@ -31,29 +31,13 @@ void qkWindowReshapeHandler(int w, int h)
 }
 
 
-
-
-
-
-void qkLookAtPlayerCamera()
-{
-	QKCamera * cam = qkGlobalPlayer->camera;
-
-	glLoadIdentity();
-	gluLookAt(
-			cam->position[0], cam->position[1], cam->position[2], // eye
-			cam->center[0], cam->center[1], cam->center[2], // center
-			0., 0., 1. // up
-	);
-}
-
-
 void qkSceneRenderHandler()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 
-	qkLookAtPlayerCamera();
+	qkGlobalPlayer->lookAt();
+	qkGlobalSolid->glDraw();
 	qkDrawMap();
 
 	glutSwapBuffers();
@@ -62,16 +46,15 @@ void qkSceneRenderHandler()
 
 void qkPeriodicSceneRender(int period)
 {
-	GLdouble dt = 0.001/((GLdouble) period);
-	qkPlayerMove(qkGlobalPlayer, dt);
+	double dt = 0.001/((double) period);
+	qkGlobalPlayer->move(dt);
+
+	Vector3d totalForce(100000., 0., 0.);
+	Vector3d totalMomentum(10000000., 0., 0.);
+
+	qkGlobalSolid->update(totalForce, totalMomentum, dt);
 
 	glutPostRedisplay();
 
 	glutTimerFunc(period, qkPeriodicSceneRender, period);
 }
-
-
-
-
-
-

@@ -5,10 +5,10 @@
  *      Author: ajuvenn
  */
 
-#ifndef QUIKE_MAP_H_
-#define QUIKE_MAP_H_
+#ifndef QUIKE_MAP_HPP_
+#define QUIKE_MAP_HPP_
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 typedef enum  {
@@ -29,7 +29,7 @@ typedef struct {
 } QKMap ;
 
 
-QKMap qkGlobalMap;
+extern QKMap qkGlobalMap;
 
 void qkLoadNewMap(const unsigned xSize, const unsigned ySize);
 
@@ -46,4 +46,4 @@ QKMapCell qkCellTypef(const GLfloat x, const GLfloat y);
 
 void qkDrawMap();
 
-#endif /* QUIKE_MAP_H_ */
+#endif /* QUIKE_MAP_HPP_ */

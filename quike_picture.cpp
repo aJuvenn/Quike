@@ -5,7 +5,7 @@
  *      Author: ajuvenn
  */
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 
@@ -85,8 +85,8 @@ uint8_t * qkBitmapData(const char * const bitmapFilePath, uint32_t * output_file
 	uint8_t firstBytes[8 + 32];
 
 	if (fread(firstBytes, 1, 40, f) != 40
-		|| firstBytes[0] != 'B'
-			|| firstBytes[1] != 'M'){
+			|| firstBytes[0] != 'B'
+					|| firstBytes[1] != 'M'){
 		fclose(f);
 		return NULL;
 	}

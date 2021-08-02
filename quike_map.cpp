@@ -5,7 +5,7 @@
  *      Author: ajuvenn
  */
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 QKMap qkGlobalMap;
@@ -16,7 +16,6 @@ void qkLoadNewMap(const unsigned xSize, const unsigned ySize)
 	qkGlobalMap.xSize = xSize;
 	qkGlobalMap.ySize = ySize;
 	QK_SIMPLE_ALLOC(qkGlobalMap.cells, xSize * ySize);
-
 }
 
 
@@ -33,8 +32,6 @@ void qkMapSetCellType(const QKMapCell type, const unsigned x, const unsigned y)
 
 int qkLoadNewMapFromBitmap(const char * const bitmapPath)
 {
-	printf("a\n");
-
 	QKPicture * pic = qkPictureLoadFromBitmap(bitmapPath);
 
 	if (pic == NULL){

@@ -5,17 +5,16 @@
  *      Author: ajuvenn
  */
 
-#ifndef QUIKE_PICTURE_H_
-#define QUIKE_PICTURE_H_
+#ifndef QUIKE_PICTURE_HPP_
+#define QUIKE_PICTURE_HPP_
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 typedef struct __attribute__((packed))
 {
 	uint8_t red;
 	uint8_t green;
 	uint8_t blue;
-
 } QKColor;
 
 
@@ -44,4 +43,4 @@ void qkPictureFree(QKPicture * const pic);
 
 
 
-#endif /* QUIKE_PICTURE_H_ */
+#endif /* QUIKE_PICTURE_HPP_ */

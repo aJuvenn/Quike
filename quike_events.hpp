@@ -5,10 +5,10 @@
  *      Author: ajuvenn
  */
 
-#ifndef QUIKE_EVENTS_H_
-#define QUIKE_EVENTS_H_
+#ifndef QUIKE_EVENTS_HPP_
+#define QUIKE_EVENTS_HPP_
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 typedef struct {
@@ -28,6 +28,7 @@ void qkPlayerEventReset(QKPlayerEvent * ev);
 
 
 void qkKeyboardEventHandler(unsigned char c, int x, int y);
+void qkKeyboardUpEventHandler(unsigned char c, int x, int y);
 
 void qkPassiveMotionEventHandler(int x, int y);
 void qkMotionEventHandler(int x, int y);
@@ -39,4 +40,4 @@ void qkUpdateMouseCenter(int windowWidth, int windowHeight);
 
 void qkPeriodicMoveUpdate(int period);
 
-#endif /* QUIKE_EVENTS_H_ */
+#endif /* QUIKE_EVENTS_HPP_ */

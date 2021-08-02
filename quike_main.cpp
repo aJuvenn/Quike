@@ -6,7 +6,7 @@
  */
 
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 
@@ -22,25 +22,8 @@ int main(int argc, char *argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-
-
-	QKPlayer * p = qkPlayerNew(10,10,0);
-	qkPlayerSetGlobalPlayer(p);
-
-	/*
-	qkLoadNewMap(20,20);
-
-	for (unsigned x = 0 ; x < 20 ; x++){
-		for (unsigned y = 0 ; y < 20 ; y++){
-			if (x == 0 || x == 20 - 1 || y == 0 || y == 20-1){
-				qkGlobalMap.cells[x + 20*y] = QK_WALL_CELL;
-			} else {
-				qkGlobalMap.cells[x + 20*y] = QK_FLOOR_CELL;
-			}
-		}
-	}
-	qkGlobalMap.cells[10 + 10*20] = QK_RESPAWN_CELL;
-*/
+	Player p = Player(10,10);
+	p.setGlobalPlayer();
 
 	if (qkLoadNewMapFromBitmap(argv[1]) == EXIT_FAILURE){
 		fprintf(stderr, "Couldn't load map from file %s\n", argv[1]);
@@ -53,13 +36,24 @@ int main(int argc, char *argv[])
 	glClearColor(0.0f, 0.7, 0.9, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
+	VectorXd masses(5);
+	masses << 1., 1., 1., 1., 1.;
+
+	Matrix3Xd points(3, 5);
+	points << 10.,12., 14., 16., 12.,
+			  10., 14., 12., 9., 8.,
+			  2.5, 3., 2.7, 2.4, 3.;
+
+	Solid s(points, masses);
+	s.print();
+	qkGlobalSolid = &s;
 
 	glutDisplayFunc(qkSceneRenderHandler);
 	glutPassiveMotionFunc(qkPassiveMotionEventHandler);
 	glutMotionFunc(qkMotionEventHandler);
 	glutKeyboardFunc(qkKeyboardEventHandler);
+	glutKeyboardUpFunc(qkKeyboardUpEventHandler);
 	glutReshapeFunc(qkWindowReshapeHandler);
-
 
 	qkInitMouseCentering();
 	qkPeriodicSceneRender(QK_FRAME_PERIOD);

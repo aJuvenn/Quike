@@ -5,12 +5,13 @@
  *      Author: ajuvenn
  */
 
-#include "quike_header.h"
+#include "quike_header.hpp"
 
 
 void qkPlayerEventReset(QKPlayerEvent * ev)
 {
-	memset(ev, 0, sizeof(QKPlayerEvent));
+	ev->dMouseX = 0;
+	ev->dMouseY = 0;
 }
 
 
@@ -35,7 +36,34 @@ void qkKeyboardEventHandler(unsigned char c, int x, int y)
 		break;
 
 	case 27: // Escape
-		exit(EXIT_SUCCESS); // TODO : proper exit
+		exit(EXIT_SUCCESS); // TODO : better exit
+		break;
+
+	default:
+		break;
+
+	}
+}
+
+
+void qkKeyboardUpEventHandler(unsigned char c, int x, int y)
+{
+	switch (c){
+
+	case 'z':
+		qkGlobalPlayer->events.forward = 0;
+		break;
+
+	case 's':
+		qkGlobalPlayer->events.backward = 0;
+		break;
+
+	case 'q':
+		qkGlobalPlayer->events.left = 0;
+		break;
+
+	case 'd':
+		qkGlobalPlayer->events.right = 0;
 		break;
 
 	default:
@@ -82,7 +110,6 @@ void qkMouseCenteringCallback(int period)
 	previousMouseX = centerMouseX;
 	previousMouseY = centerMouseY;
 	glutWarpPointer(centerMouseX, centerMouseY);
-
 	glutTimerFunc(period, qkMouseCenteringCallback, period);
 }
 
