@@ -16,6 +16,8 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <vector>
+#include <algorithm>
+#include <set>
 #include <iostream>
 
 #include <Eigen/Dense>

@@ -8,6 +8,18 @@
 
 #include "quike_header.hpp"
 
+Solid randomSolid(double x, double y, double z, double width, size_t nbPoints)
+{
+	VectorXd masses(nbPoints);
+	masses.setConstant(1.);
+
+	Matrix3Xd points(3, nbPoints);
+	points = Matrix3Xd::Random(3, nbPoints) * width;
+	Vector3d offset(x, y, z);
+	points.colwise() += offset;
+
+	return Solid(points, masses);
+}
 
 
 #define QK_FRAME_PERIOD 40
@@ -22,7 +34,7 @@ int main(int argc, char *argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-	Player p = Player(10,10);
+	Player p = Player(10., 40.);
 	p.setGlobalPlayer();
 
 	if (qkLoadNewMapFromBitmap(argv[1]) == EXIT_FAILURE){
@@ -36,15 +48,8 @@ int main(int argc, char *argv[])
 	glClearColor(0.0f, 0.7, 0.9, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
-	VectorXd masses(5);
-	masses << 1., 1., 1., 1., 1.;
 
-	Matrix3Xd points(3, 5);
-	points << 10.,12., 14., 16., 12.,
-			  10., 14., 12., 9., 8.,
-			  2.5, 3., 2.7, 2.4, 3.;
-
-	Solid s(points, masses);
+	Solid s = randomSolid(10., 20., 3., 2., 10);
 	s.print();
 	qkGlobalSolid = &s;
 

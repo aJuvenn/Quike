@@ -46,7 +46,7 @@ int qkLoadNewMapFromBitmap(const char * const bitmapPath)
 	for (unsigned x = 0 ; x < width ; x++){
 		for (unsigned y = 0 ; y < height ; y++){
 
-			QKColor c = pic->pixels[height - 1 - y][x];
+			QKColor c = pic->pixels[y][x];
 
 			if (qkColorAreEquals(c, QK_COLOR_BLACK)){
 				qkMapSetCellType(QK_WALL_CELL, x, y);

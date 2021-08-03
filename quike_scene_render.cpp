@@ -50,7 +50,7 @@ void qkPeriodicSceneRender(int period)
 	qkGlobalPlayer->move(dt);
 
 	Vector3d totalForce(100000., 0., 0.);
-	Vector3d totalMomentum(10000000., 0., 0.);
+	Vector3d totalMomentum(0., 10000000., 0.);
 
 	qkGlobalSolid->update(totalForce, totalMomentum, dt);
 

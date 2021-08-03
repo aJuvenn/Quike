@@ -36,19 +36,23 @@ Matrix3d inertiaMatrix(const Matrix3Xd & centeredPoints, const VectorXd & masses
 }
 
 Solid::Solid(const Matrix3Xd & points, const VectorXd & masses):
-							initialPoints(points),
-							masses(masses),
-							nbPoints(points.cols()),
-							centerPosition(points.rowwise().mean()),
-							centerVelocity(0., 0., 0.),
-							centeredInitialPoints(points.colwise() - centerPosition),
-							totalMass(masses.sum()),
-							totalMassInverse(1. / totalMass),
-							initialInertiaMatrix(inertiaMatrix(centeredInitialPoints, masses)),
-							initialInertiaMatrixInverse(initialInertiaMatrix.inverse()),
-							rotationQuaternion(1., 0., 0., 0.),
-							rotationMatrix(rotationQuaternion.toRotationMatrix()),
-							angularMomentum(0., 0., 0.) {}
+											initialPoints(points),
+											masses(masses),
+											nbPoints(points.cols()),
+											totalMass(masses.sum()),
+											totalMassInverse(1. / totalMass),
+											centerPosition((points.array().rowwise() * masses.transpose().array()).rowwise().sum() / totalMass),
+											centerVelocity(0., 0., 0.),
+											centeredInitialPoints(points.colwise() - centerPosition),
+											initialInertiaMatrix(inertiaMatrix(centeredInitialPoints, masses)),
+											initialInertiaMatrixInverse(initialInertiaMatrix.inverse()),
+											rotationQuaternion(1., 0., 0., 0.),
+											rotationMatrix(rotationQuaternion.toRotationMatrix()),
+											angularMomentum(0., 0., 0.),
+											currentPoints(points)
+{
+	updateAABB();
+}
 
 
 void Solid::updatePosition(const Vector3d & totalForce, const double dt)
@@ -64,17 +68,17 @@ void Solid::updateOrientation(const Vector3d & totalForceMomentum, const double 
 	angularMomentum += dt * totalForceMomentum;
 
 	/* Rotation matrix corresponding to the current object angle */
-	Matrix3d & R = rotationMatrix;
+	const Matrix3d & R = rotationMatrix;
 
 	/* Inertia matrix inverse is obtained from the initial one by a change of bases */
-	Matrix3d currentInertiaMatrixInverse = R * initialInertiaMatrixInverse * R.transpose();
+	const Matrix3d currentInertiaMatrixInverse = R * initialInertiaMatrixInverse * R.transpose();
 
 	/* Angular speed vector is obtained from the momentum and the inertia */
-	Vector3d w = currentInertiaMatrixInverse * angularMomentum;
-	Quaterniond wAsQuaternion(0., w(0), w(1), w(2));
+	const Vector3d angularSpeed = currentInertiaMatrixInverse * angularMomentum;
+	Quaterniond angularSpeedAsQuaternion(0., angularSpeed(0), angularSpeed(1), angularSpeed(2));
 
 	/* Rotation quaternion integration from a derivative computed with a quaternion multiplication */
-	Quaterniond tmp = wAsQuaternion * rotationQuaternion;
+	const Quaterniond tmp = angularSpeedAsQuaternion * rotationQuaternion;
 	rotationQuaternion.w() += dt * 0.5 * tmp.w();
 	rotationQuaternion.vec() += dt * 0.5 * tmp.vec();
 
@@ -90,12 +94,38 @@ void Solid::update(const Vector3d & totalForce, const Vector3d & totalForceMomen
 {
 	updatePosition(totalForce, dt);
 	updateOrientation(totalForceMomentum, dt);
+	updateCurrentPoints();
+	updateAABB();
 }
 
-void Solid::getPoints(Matrix3Xd & outputPoints) const
+
+void Solid::update(const Matrix3Xd & forcePerPoint, const double dt)
 {
-	outputPoints = (rotationMatrix * centeredInitialPoints).colwise() + centerPosition;
+	Vector3d totalForce = forcePerPoint.rowwise().sum();
+	Matrix3Xd relativePositions = rotationMatrix * centeredInitialPoints;
+	Vector3d totalForceMomentum;
+	totalForceMomentum.setZero();
+
+	for (size_t i = 0 ; i < nbPoints ; i++){
+		totalForceMomentum += relativePositions.col(i).cross(forcePerPoint.col(i));
+	}
+
+	update(totalForce, totalForceMomentum, dt);
 }
+
+
+const Matrix3Xd & Solid::getCurrentPoints() const
+{
+	return currentPoints;
+}
+
+
+void Solid::updateCurrentPoints()
+{
+	currentPoints = (rotationMatrix * centeredInitialPoints).colwise() + centerPosition;
+}
+
+
 
 void Solid::print() const
 {
@@ -113,15 +143,16 @@ void Solid::print() const
 	std::cout << "rotationQuaternion:\n" << rotationQuaternion.w() << std::endl << rotationQuaternion.vec() << std::endl;
 	std::cout << "rotationMatrix:\n" << rotationMatrix << std::endl;
 	std::cout << "angularMomentum:\n" << angularMomentum << std::endl;
+	std::cout << "currentPoints:\n" << currentPoints << std::endl;
 	std::cout << "-----------------------" << std::endl;
 }
 
 
 void Solid::glDraw() const
 {
-	Matrix3Xd points(3, nbPoints);
-	getPoints(points);
+	const Matrix3Xd & points = getCurrentPoints();
 
+	glColor3f(1., 0., 0.);
 	glBegin(GL_POLYGON);
 
 	for (size_t i = 0 ; i < nbPoints ; i++){
@@ -129,4 +160,159 @@ void Solid::glDraw() const
 	}
 
 	glEnd();
+
+	glColor3f(0., 1., 0.);
+	glBegin(GL_LINES);
+
+	for (int i = 0 ; i < 8 ; ++i){
+		glVertex3f(aabbCornerPoints(0, i), aabbCornerPoints(1, i), aabbCornerPoints(2, i));
+	}
+
+	for (int i = 0 ; i < 4 ; ++i){
+		int j = i+4;
+		glVertex3f(aabbCornerPoints(0, i), aabbCornerPoints(1, i), aabbCornerPoints(2, i));
+		glVertex3f(aabbCornerPoints(0, j), aabbCornerPoints(1, j), aabbCornerPoints(2, j));
+	}
+
+	for (int i = 0 ; i < 6 ; ++i){
+		int j = i+2;
+		glVertex3f(aabbCornerPoints(0, i), aabbCornerPoints(1, i), aabbCornerPoints(2, i));
+		glVertex3f(aabbCornerPoints(0, j), aabbCornerPoints(1, j), aabbCornerPoints(2, j));
+	}
+
+	glEnd();
+
+}
+
+
+void Solid::updateAABB()
+{
+	const Matrix3Xd & points = getCurrentPoints();
+
+	minAndMaxCoords.col(0) = points.rowwise().minCoeff();
+	minAndMaxCoords.col(1) = points.rowwise().maxCoeff();
+
+	int i = 0;
+
+	for (int x = 0 ; x < 2 ; ++x){
+		for (int y = 0 ; y < 2 ; ++y){
+			for (int z = 0 ; z < 2 ; ++z){
+				aabbCornerPoints(0, i) = minAndMaxCoords(0, x);
+				aabbCornerPoints(1, i) = minAndMaxCoords(1, y);
+				aabbCornerPoints(2, i) = minAndMaxCoords(2, z);
+				++i;
+			}
+		}
+	}
+}
+
+bool Solid::aabbIntersectsWith(const Solid & otherSolid) const
+{
+	const Matrix<double, 3, 2> & AABB = minAndMaxCoords;
+	const Matrix<double, 3, 2> & otherAABB = otherSolid.minAndMaxCoords;
+
+	for (int i = 0 ; i < 3 ; i++){
+		if (!((otherAABB(i, 0) <= AABB(i, 0) && AABB(i, 0) <= otherAABB(i, 1))
+				|| (AABB(i, 0) <= otherAABB(i, 0) && otherAABB(i, 0) <= AABB(i, 1)))){
+			return false;
+		}
+	}
+	return true;
+}
+
+
+const Vector3d & Solid::getCenterPosition() const
+{
+	return centerPosition;
+}
+
+
+Vector3d AabbCollisionDetector::getProjectionAxis()
+{
+	Matrix3Xd solidCenters(3, nbSolids);
+
+	for (size_t i = 0 ; i < nbSolids ; ++i){
+		solidCenters.col(i) = solids[i]->getCenterPosition();
+	}
+
+	Vector3d center = solidCenters.rowwise().mean();
+	solidCenters.colwise() -= center;
+
+	Matrix3d correlationMatrix = (solidCenters * solidCenters.transpose()) / nbSolids;
+	SelfAdjointEigenSolver<Matrix3d> solver(correlationMatrix);
+
+	return Vector3d(solver.eigenvectors().col(2));
+}
+
+
+const Matrix<double, 3, 8> & Solid::getAabbCornerPoints() const
+{
+	return aabbCornerPoints;
+}
+
+
+struct CollisionDetectionBound
+{
+	size_t solidId;
+	int minOrMaxId;
+	double value;
+};
+
+bool collisionDetectionBoundCmp(const CollisionDetectionBound & a, const CollisionDetectionBound & b)
+{
+	return (bool) a.value <= b.value;
+}
+
+
+AabbCollisionDetector * qkAabbCollisionDetector;
+
+std::vector<std::pair<Solid *, Solid *>> AabbCollisionDetector::getCollidingSolids()
+{
+	const Vector3d axis = getProjectionAxis();
+	std::vector<CollisionDetectionBound> v(2 * nbSolids);
+
+	for (size_t i = 0 ; i < nbSolids ; ++i){
+		Solid * s = solids[i];
+		const Matrix<double, 3, 8> & aabbCorners = s->getAabbCornerPoints();
+		const Matrix<double, 1, 8> cornerProjections = axis.transpose() * aabbCorners;
+		v[2*i] = (CollisionDetectionBound) {i, 0, cornerProjections.minCoeff()};
+		v[2*i+1] = (CollisionDetectionBound) {i, 1, cornerProjections.maxCoeff()};
+	}
+
+	std::sort(v.begin(), v.end(), collisionDetectionBoundCmp);
+
+	std::vector<std::pair<Solid *, Solid *>> output;
+	std::set<size_t> activeSolidIds;
+
+	for (size_t j = 0 ; j < 2 * nbSolids ; ++j){
+
+		CollisionDetectionBound & current = v[j];
+
+		if (current.minOrMaxId == 0){
+			Solid * currentSolid = solids[current.solidId];
+			for (size_t activeSolidId : activeSolidIds){
+				Solid * activeSolid = solids[activeSolidId];
+				if (activeSolid->aabbIntersectsWith(*currentSolid)){
+					output.push_back(std::make_pair(activeSolid, currentSolid));
+				}
+			}
+			activeSolidIds.insert(current.solidId);
+		} else {
+			activeSolidIds.erase(current.solidId);
+		}
+	}
+
+	return output;
+}
+
+
+void AabbCollisionDetector::addSolid(Solid * solid)
+{
+	solids.push_back(solid);
+	nbSolids++;
+}
+
+const std::vector<Solid *> & AabbCollisionDetector::getSolids()
+{
+	return solids;
 }
