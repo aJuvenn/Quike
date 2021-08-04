@@ -5,7 +5,7 @@
  *      Author: ajuvenn
  */
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 #define QK_PLAYER_CAMERA_HEIGHT 1.5
 

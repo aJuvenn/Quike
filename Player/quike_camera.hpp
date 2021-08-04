@@ -9,7 +9,7 @@
 #ifndef QUIKE_CAMERA_HPP_
 #define QUIKE_CAMERA_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 #define QK_CAMERA_VERTICAL_BOUND 0.1
 

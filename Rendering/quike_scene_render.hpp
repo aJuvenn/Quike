@@ -8,7 +8,7 @@
 #ifndef DEBUG_QUIKE_SCENE_RENDER_H_
 #define DEBUG_QUIKE_SCENE_RENDER_H_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 void qkWindowReshapeHandler(int w, int h);

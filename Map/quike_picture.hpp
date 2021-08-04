@@ -8,7 +8,7 @@
 #ifndef QUIKE_PICTURE_HPP_
 #define QUIKE_PICTURE_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 typedef struct __attribute__((packed))
 {

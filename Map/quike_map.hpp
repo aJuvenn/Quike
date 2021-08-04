@@ -8,7 +8,7 @@
 #ifndef QUIKE_MAP_HPP_
 #define QUIKE_MAP_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 typedef enum  {

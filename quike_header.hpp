@@ -24,15 +24,15 @@
 
 using namespace Eigen;
 
-#include "quike_camera.hpp"
-#include "quike_draw.hpp"
-#include "quike_events.hpp"
-#include "quike_map.hpp"
-#include "quike_movable.hpp"
-#include "quike_picture.hpp"
-#include "quike_player.hpp"
-#include "quike_scene_render.hpp"
-#include "quike_utils.hpp"
-#include "quike_solid.hpp"
+#include "./Player/quike_camera.hpp"
+#include "./Rendering/quike_draw.hpp"
+#include "./Player/quike_events.hpp"
+#include "./Map/quike_map.hpp"
+#include "./Player/quike_movable.hpp"
+#include "./Map/quike_picture.hpp"
+#include "./Player/quike_player.hpp"
+#include "./Rendering/quike_scene_render.hpp"
+#include "./Utils/quike_utils.hpp"
+#include "./Physics/quike_solid.hpp"
 
 #endif /* QUIKE_HEADER_HPP_ */

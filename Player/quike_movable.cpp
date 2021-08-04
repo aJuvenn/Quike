@@ -5,7 +5,7 @@
  *      Author: ajuvenn
  */
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 Movable2d::Movable2d(const double x, const double y)

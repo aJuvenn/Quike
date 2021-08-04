@@ -8,7 +8,7 @@
 #ifndef QUIKE_PLAYER_HPP_
 #define QUIKE_PLAYER_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 class Player

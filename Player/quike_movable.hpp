@@ -8,7 +8,7 @@
 #ifndef QUIKE_MOVABLE_HPP_
 #define QUIKE_MOVABLE_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 class Movable2d

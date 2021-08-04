@@ -8,7 +8,7 @@
 #ifndef QUIKE_EVENTS_HPP_
 #define QUIKE_EVENTS_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 typedef struct {

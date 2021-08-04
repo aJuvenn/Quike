@@ -8,7 +8,7 @@
 #ifndef QUIKE_SOLID_HPP_
 #define QUIKE_SOLID_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 
@@ -47,7 +47,6 @@ class Solid
 	Matrix<double, 3, 2> minAndMaxCoords;
 	Matrix<double, 3, 8> aabbCornerPoints;
 
-
 	/* Integrates velocity and position for a time step dt if the sum
 	 * of every forces is provided */
 	void updatePosition(const Vector3d & totalForce, const double dt);
@@ -69,6 +68,7 @@ public:
 	void update(const Matrix3Xd & forcePerPoint, const double dt);
 
 	void glDraw() const;
+	void glDrawAabb(bool plotInRed = false) const;
 
 	const Matrix3Xd & getCurrentPoints() const;
 
@@ -83,28 +83,54 @@ public:
 };
 
 
-extern Solid * qkGlobalSolid;
+extern std::vector<Solid *> qkGlobalSolidList;
 
+
+struct AabbBound
+{
+	size_t solidId;
+	int minOrMaxId;
+	double value;
+};
 
 class AabbCollisionDetector
 {
+public:
+	typedef std::vector<std::pair<Solid *, Solid *>> CollisionList;
+
+private:
 	size_t nbSolids;
 	std::vector<Solid *> solids;
 
-	Vector3d getProjectionAxis();
+	Vector3d currentProjectionAxis;
+	const Vector3d & computeProjectionAxis();
+
+	std::vector<AabbBound> aabbBoundList;
+	CollisionList collisions;
+	std::set<Solid *> collidingSolids;
 
 public:
+
+	const std::set<Solid *> & getCollidingSolids() const;
+
+	bool solidIsColliding(Solid & solid) const;
+
+	const Vector3d & getCurrentProjectionAxis() const;
+
+	void glDrawCurrentAxis(const Vector3d & position, const double len) const;
 
 	AabbCollisionDetector();
 
 	void addSolid(Solid * solid);
-	const std::vector<Solid *> & getSolids();
+	const std::vector<Solid *> & getSolids() const;
 
-	std::vector<std::pair<Solid *, Solid *>> getCollidingSolids();
+	const CollisionList & getCollisions() const;
+	void computeCollisions();
 
 };
 
 extern AabbCollisionDetector * qkGlobalAabbCollisionDetector;
 
+bool isInACollision(const Solid * const s, const std::vector<std::pair<Solid *, Solid *>> & collisions);
 
 #endif /* QUIKE_SOLID_HPP_ */

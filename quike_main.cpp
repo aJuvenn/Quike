@@ -8,7 +8,7 @@
 
 #include "quike_header.hpp"
 
-Solid randomSolid(double x, double y, double z, double width, size_t nbPoints)
+Solid * randomSolid(double x, double y, double z, double width, size_t nbPoints)
 {
 	VectorXd masses(nbPoints);
 	masses.setConstant(1.);
@@ -18,7 +18,7 @@ Solid randomSolid(double x, double y, double z, double width, size_t nbPoints)
 	Vector3d offset(x, y, z);
 	points.colwise() += offset;
 
-	return Solid(points, masses);
+	return new Solid(points, masses);
 }
 
 
@@ -48,10 +48,26 @@ int main(int argc, char *argv[])
 	glClearColor(0.0f, 0.7, 0.9, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
+	Solid * solids[8];
+	solids[0] = randomSolid(10., 20., 3., 2., 10);
+	solids[1] = randomSolid(20., 10., 3., 2., 10);
+	solids[2] = randomSolid(10., 10., 3., 2., 10);
+	solids[3] = randomSolid(20., 20., 3., 2., 10);
+	solids[4] = randomSolid(10., 40., 3., 2., 10);
+	solids[5] = randomSolid(20., 30., 3., 2., 10);
+	solids[6] = randomSolid(10., 30., 3., 2., 10);
+	solids[7] = randomSolid(20., 40., 3., 2., 10);
 
-	Solid s = randomSolid(10., 20., 3., 2., 10);
-	s.print();
-	qkGlobalSolid = &s;
+	for (int i = 0 ; i < 8 ; ++i){
+		qkGlobalSolidList.push_back(solids[i]);
+	}
+
+	AabbCollisionDetector d;
+	qkGlobalAabbCollisionDetector = &d;
+
+	for (Solid * s : qkGlobalSolidList){
+		d.addSolid(s);
+	}
 
 	glutDisplayFunc(qkSceneRenderHandler);
 	glutPassiveMotionFunc(qkPassiveMotionEventHandler);

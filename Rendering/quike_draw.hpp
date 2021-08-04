@@ -8,7 +8,7 @@
 #ifndef QUIKE_DRAW_HPP_
 #define QUIKE_DRAW_HPP_
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 void qkDrawWall(const unsigned x, const unsigned y);
 

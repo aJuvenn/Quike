@@ -6,7 +6,7 @@
  */
 
 
-#include "quike_header.hpp"
+#include "../quike_header.hpp"
 
 
 void qkWindowReshapeHandler(int w, int h)
@@ -37,7 +37,15 @@ void qkSceneRenderHandler()
 	glMatrixMode(GL_MODELVIEW);
 
 	qkGlobalPlayer->lookAt();
-	qkGlobalSolid->glDraw();
+
+	Vector3d arrowPosition(20.,20., 5.);
+	qkGlobalAabbCollisionDetector->glDrawCurrentAxis(arrowPosition, 10.);
+
+	for (Solid * s : qkGlobalSolidList){
+		s->glDraw();
+		s->glDrawAabb(qkGlobalAabbCollisionDetector->solidIsColliding(*s));
+	}
+
 	qkDrawMap();
 
 	glutSwapBuffers();
@@ -47,14 +55,20 @@ void qkSceneRenderHandler()
 void qkPeriodicSceneRender(int period)
 {
 	double dt = 0.001/((double) period);
+
 	qkGlobalPlayer->move(dt);
 
-	Vector3d totalForce(100000., 0., 0.);
+	Vector3d totalForce(1000000., 0., 0.);
 	Vector3d totalMomentum(0., 10000000., 0.);
 
-	qkGlobalSolid->update(totalForce, totalMomentum, dt);
+	double sign = 1;
+	for (Solid * s : qkGlobalSolidList){
+		s->update(totalForce * sign, totalMomentum, dt);
+		sign *= -1;
+	}
+
+	qkGlobalAabbCollisionDetector->computeCollisions();
 
 	glutPostRedisplay();
-
 	glutTimerFunc(period, qkPeriodicSceneRender, period);
 }
