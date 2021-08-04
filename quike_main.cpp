@@ -48,18 +48,14 @@ int main(int argc, char *argv[])
 	glClearColor(0.0f, 0.7, 0.9, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
-	Solid * solids[8];
-	solids[0] = randomSolid(10., 20., 3., 2., 10);
-	solids[1] = randomSolid(20., 10., 3., 2., 10);
-	solids[2] = randomSolid(10., 10., 3., 2., 10);
-	solids[3] = randomSolid(20., 20., 3., 2., 10);
-	solids[4] = randomSolid(10., 40., 3., 2., 10);
-	solids[5] = randomSolid(20., 30., 3., 2., 10);
-	solids[6] = randomSolid(10., 30., 3., 2., 10);
-	solids[7] = randomSolid(20., 40., 3., 2., 10);
+	const size_t nbSolids = 50;
 
-	for (int i = 0 ; i < 8 ; ++i){
-		qkGlobalSolidList.push_back(solids[i]);
+	Array3d center(20., 20., 3.);
+	Array3d sigma(20., 20., 1.);
+
+	for (size_t i = 0 ; i < nbSolids ; i++){
+		Vector3d coords = Array3d::Random() * sigma + center;
+		qkGlobalSolidList.push_back(randomSolid(coords(0), coords(1), coords(2), 2., 10));
 	}
 
 	AabbCollisionDetector d;
