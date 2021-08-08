@@ -8,17 +8,16 @@
 
 #include "quike_header.hpp"
 
-Solid * randomSolid(double x, double y, double z, double width, size_t nbPoints)
+SolidPoints * randomRigidPoints(const Vector3d & position, double width, size_t nbPoints)
 {
 	VectorXd masses(nbPoints);
 	masses.setConstant(1.);
 
 	Matrix3Xd points(3, nbPoints);
 	points = Matrix3Xd::Random(3, nbPoints) * width;
-	Vector3d offset(x, y, z);
-	points.colwise() += offset;
+	points.colwise() += position;
 
-	return new Solid(points, masses);
+	return new SolidPoints(points, masses);
 }
 
 
@@ -48,14 +47,32 @@ int main(int argc, char *argv[])
 	glClearColor(0.0f, 0.7, 0.9, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
-	const size_t nbSolids = 50;
 
-	Array3d center(20., 20., 3.);
-	Array3d sigma(20., 20., 1.);
+	const size_t nbPoints = 10;
+	const size_t nbRigidBodies = 10;
+	const double solidSizes = 2.;
+	const Array3d center(20., 20., 3.);
+	const Array3d sigma(20., 20., 1.);
 
-	for (size_t i = 0 ; i < nbSolids ; i++){
+	for (size_t i = 0 ; i < nbRigidBodies ; i++){
 		Vector3d coords = Array3d::Random() * sigma + center;
-		qkGlobalSolidList.push_back(randomSolid(coords(0), coords(1), coords(2), 2., 10));
+		qkGlobalSolidList.push_back(randomRigidPoints(coords, solidSizes, nbPoints));
+	}
+
+	const size_t radius = 2.;
+
+	for (size_t i = 0 ; i < nbRigidBodies ; i++){
+		Vector3d coords = Array3d::Random() * sigma + center;
+		SolidCuboid * s = new SolidCuboid(radius, 2. * radius, 0.5 * radius, 1.);
+		s->displace(coords);
+		qkGlobalSolidList.push_back(s);
+	}
+
+	for (size_t i = 0 ; i < nbRigidBodies ; i++){
+		Vector3d coords = Array3d::Random() * sigma + center;
+		SolidSphere * s = new SolidSphere(radius, 1.);
+		s->displace(coords);
+		qkGlobalSolidList.push_back(s);
 	}
 
 	AabbCollisionDetector d;

@@ -25,6 +25,9 @@ public:
 	void lookAt() const;
 
 	void move(const double dt);
+
+	const Vector3d & getCameraPosition() const;
+	const Vector3d & getCameraDirection() const;
 };
 
 extern Player * qkGlobalPlayer;

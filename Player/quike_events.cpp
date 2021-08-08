@@ -20,18 +20,22 @@ void qkKeyboardEventHandler(unsigned char c, int x, int y)
 	switch (c){
 
 	case 'z':
+	case 'Z':
 		qkGlobalPlayer->events.forward = 1;
 		break;
 
 	case 's':
+	case 'S':
 		qkGlobalPlayer->events.backward = 1;
 		break;
 
 	case 'q':
+	case 'Q':
 		qkGlobalPlayer->events.left = 1;
 		break;
 
 	case 'd':
+	case 'D':
 		qkGlobalPlayer->events.right = 1;
 		break;
 
@@ -51,18 +55,22 @@ void qkKeyboardUpEventHandler(unsigned char c, int x, int y)
 	switch (c){
 
 	case 'z':
+	case 'Z':
 		qkGlobalPlayer->events.forward = 0;
 		break;
 
 	case 's':
+	case 'S':
 		qkGlobalPlayer->events.backward = 0;
 		break;
 
 	case 'q':
+	case 'Q':
 		qkGlobalPlayer->events.left = 0;
 		break;
 
 	case 'd':
+	case 'D':
 		qkGlobalPlayer->events.right = 0;
 		break;
 

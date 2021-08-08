@@ -78,3 +78,17 @@ void Player::lookAt() const
 	camera.lookAt();
 }
 
+
+const Vector3d & Player::getCameraPosition() const
+{
+	return camera.getPosition();
+}
+
+
+const Vector3d & Player::getCameraDirection() const
+{
+	return camera.getDirection();
+}
+
+
+

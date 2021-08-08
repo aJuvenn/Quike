@@ -7,16 +7,16 @@
 #include "../quike_header.hpp"
 
 
-AabbCollisionDetector * qkAabbCollisionDetector;
+AabbCollisionDetector * qkGlobalAabbCollisionDetector;
 
 
-AabbCollisionDetector::AabbCollisionDetector():
-										nbSolids(0),
-										solids(),
-										currentProjectionAxis(1., 0., 0.),
-										aabbBoundList(),
-										collisions(),
-										collidingSolids()
+AabbCollisionDetector::AabbCollisionDetector()
+: nbSolids(0),
+  solids(),
+  currentProjectionAxis(1., 0., 0.),
+  boundList(),
+  collisions(),
+  collidingSolids()
 {
 
 }
@@ -46,19 +46,19 @@ const std::set<Solid *> & AabbCollisionDetector::getCollidingSolids() const
 }
 
 
-bool AabbCollisionDetector::solidIsColliding(Solid & solid) const
+bool AabbCollisionDetector::solidIsColliding(Solid & body) const
 {
-	return (collidingSolids.find(&solid) != collidingSolids.end());
+	return (collidingSolids.find(&body) != collidingSolids.end());
 }
 
 
-void AabbCollisionDetector::addSolid(Solid * solid)
+void AabbCollisionDetector::addSolid(Solid * body)
 {
-	solids.push_back(solid);
-	AabbBound b = (AabbBound) {nbSolids, 0, 0.};
-	aabbBoundList.push_back(b);
-	b = (AabbBound) {nbSolids, 1, 0.};
-	aabbBoundList.push_back(b);
+	solids.push_back(body);
+	ProjectedSolidBound b = (ProjectedSolidBound) {nbSolids, 0, 0.};
+	boundList.push_back(b);
+	b = (ProjectedSolidBound) {nbSolids, 1, 0.};
+	boundList.push_back(b);
 	++nbSolids;
 }
 
@@ -101,13 +101,13 @@ void AabbCollisionDetector::glDrawCurrentAxis(const Vector3d & position, const d
 }
 
 
-void qkAabbBoundInsertionSort(std::vector<AabbBound> & v)
+void qkProjectedSolidBoundInsertionSort(std::vector<ProjectedSolidBound> & v)
 {
 	const size_t nbElements = v.size();
 
 	for (size_t i = 1 ; i < nbElements ; ++i){
 
-		AabbBound b = v[i];
+		ProjectedSolidBound b = v[i];
 		size_t j;
 
 		for (j = i ; j > 0 && v[j-1].value > b.value ; --j){
@@ -120,32 +120,31 @@ void qkAabbBoundInsertionSort(std::vector<AabbBound> & v)
 
 void AabbCollisionDetector::computeCollisions()
 {
-	const RowVector3d projectionAxis = computeProjectionAxis().transpose();
+	const Vector3d projectionAxis = computeProjectionAxis();
+	const Vector3d oppositeProjectionAxis = -projectionAxis;
+	const RowVector3d projectionAxisT = projectionAxis.transpose();
 	Matrix2Xd minMaxProjections(2, nbSolids);
 
 	for (size_t solidId = 0 ; solidId < nbSolids ; ++solidId){
 		Solid * s = solids[solidId];
-		const Matrix<double, 1, 8> aabbCornerProjections = projectionAxis * s->getAabbCornerPoints();
-		minMaxProjections(0, solidId) = aabbCornerProjections.minCoeff();
-		minMaxProjections(1, solidId) = aabbCornerProjections.maxCoeff();
+		minMaxProjections(0, solidId) = projectionAxisT * s->getClosestPoint(oppositeProjectionAxis);
+		minMaxProjections(1, solidId) = projectionAxisT * s->getClosestPoint(projectionAxis);
 	}
 
-	for (AabbBound & b : aabbBoundList){
+	for (ProjectedSolidBound & b : boundList){
 		b.value = minMaxProjections(b.minOrMaxId, b.solidId);
 	}
 
-	qkAabbBoundInsertionSort(aabbBoundList);
+	qkProjectedSolidBoundInsertionSort(boundList);
 
 	collisions.clear();
 	collidingSolids.clear();
 	std::set<size_t> activeSolidIds;
 
-	for (size_t j = 0 ; j < 2 * nbSolids ; ++j){
+	for (const ProjectedSolidBound & currentBound : boundList){
 
-		AabbBound & current = aabbBoundList[j];
-
-		if (current.minOrMaxId == 0){
-			Solid * currentSolid = solids[current.solidId];
+		if (currentBound.minOrMaxId == 0){
+			Solid * currentSolid = solids[currentBound.solidId];
 			for (size_t activeSolidId : activeSolidIds){
 				Solid * activeSolid = solids[activeSolidId];
 				if (activeSolid->aabbIntersectsWith(*currentSolid)){
@@ -154,9 +153,9 @@ void AabbCollisionDetector::computeCollisions()
 					collidingSolids.insert(currentSolid);
 				}
 			}
-			activeSolidIds.insert(current.solidId);
+			activeSolidIds.insert(currentBound.solidId);
 		} else {
-			activeSolidIds.erase(current.solidId);
+			activeSolidIds.erase(currentBound.solidId);
 		}
 	}
 }

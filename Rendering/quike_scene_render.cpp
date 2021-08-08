@@ -62,11 +62,11 @@ void qkPeriodicSceneRender(int period)
 	qkGlobalPlayer->move(dt);
 
 	Vector3d totalForce(1000000. * sin(1000. * total_t), 0., 0.);
-	Vector3d totalMomentum(0., 10000000. * sin(1000. * total_t), 0.);
+	Vector3d totalMomentum(0., (10000000. * sin(1000. * total_t)), 0.);
 
 	double sign = 1;
 	for (Solid * s : qkGlobalSolidList){
-		s->update(totalForce * sign, totalMomentum, dt);
+		s->applyForce(totalForce * sign, totalMomentum, dt);
 		sign *= -1;
 	}
 

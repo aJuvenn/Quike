@@ -104,8 +104,19 @@ void qkFreeMap()
 
 void qkDrawMap()
 {
+	const Vector3d & playerPosition = qkGlobalPlayer->getCameraPosition();
+	const Vector3d & playerDirection = qkGlobalPlayer->getCameraDirection();
+
 	for (unsigned x = 0 ; x < qkGlobalMap.xSize ; x++){
 		for (unsigned y = 0 ; y < qkGlobalMap.ySize ; y++){
+
+			Vector3d p((double) x, (double) y, 0.);
+			p -= playerPosition;
+			p.normalize();
+
+			if (playerDirection.dot(p) < 0.4){
+				continue;
+			}
 
 			switch (qkMapCellType(x, y)){
 

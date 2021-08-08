@@ -1,18 +1,18 @@
 /*
- * quike_aabb_collision.hpp
+ * quike_aabb_collision.h
  *
- *  Created on: 4 août 2021
+ *  Created on: 8 août 2021
  *      Author: ajuvenn
  */
-
 
 #ifndef PHYSICS_QUIKE_AABB_COLLISION_HPP_
 #define PHYSICS_QUIKE_AABB_COLLISION_HPP_
 
+
 #include "../quike_header.hpp"
 
 
-struct AabbBound
+struct ProjectedSolidBound
 {
 	size_t solidId;
 	int minOrMaxId;
@@ -32,7 +32,7 @@ private:
 	Vector3d currentProjectionAxis;
 	const Vector3d & computeProjectionAxis();
 
-	std::vector<AabbBound> aabbBoundList;
+	std::vector<ProjectedSolidBound> boundList;
 	CollisionList collisions;
 	std::set<Solid *> collidingSolids;
 
@@ -40,7 +40,7 @@ public:
 
 	const std::set<Solid *> & getCollidingSolids() const;
 
-	bool solidIsColliding(Solid & solid) const;
+	bool solidIsColliding(Solid & body) const;
 
 	const Vector3d & getCurrentProjectionAxis() const;
 
@@ -48,7 +48,7 @@ public:
 
 	AabbCollisionDetector();
 
-	void addSolid(Solid * solid);
+	void addSolid(Solid * body);
 	const std::vector<Solid *> & getSolids() const;
 
 	const CollisionList & getCollisions() const;
