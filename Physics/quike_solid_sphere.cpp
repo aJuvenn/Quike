@@ -23,7 +23,7 @@ double SolidSphere::getRadius() const
 }
 
 
-Vector3d SolidSphere::getClosestPoint(const Vector3d & direction)
+Vector3d SolidSphere::getClosestPoint(const Vector3d & direction) const
 {
 	return centerPosition + direction * radius;
 }

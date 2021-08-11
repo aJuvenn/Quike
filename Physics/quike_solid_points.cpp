@@ -79,7 +79,7 @@ size_t SolidPoints::getNbPoints() const
 }
 
 
-Vector3d SolidPoints::getClosestPoint(const Vector3d & direction)
+Vector3d SolidPoints::getClosestPoint(const Vector3d & direction) const
 {
 	const RowVector3d rotatedDirectionT = (rotationMatrix.transpose() * direction).transpose();
 	const RowVectorXd scalarProducts = rotatedDirectionT * centeredInitialPoints;

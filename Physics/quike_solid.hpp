@@ -53,7 +53,7 @@ public:
 	bool aabbIntersectsWith(const Solid & otherSolid) const;
 	const Matrix<double, 3, 8> & getAabbCornerPoints() const;
 
-	virtual Vector3d getClosestPoint(const Vector3d & direction) = 0;
+	virtual Vector3d getClosestPoint(const Vector3d & direction) const = 0;
 
 	Matrix4d getGlTransfMatrix() const;
 
@@ -90,7 +90,7 @@ public:
 	double getRadius() const;
 
 
-	virtual Vector3d getClosestPoint(const Vector3d & direction);
+	virtual Vector3d getClosestPoint(const Vector3d & direction) const;
 	virtual void print() const;
 	virtual void glDraw() const;
 };
@@ -108,7 +108,7 @@ public:
 	double getWidthY() const;
 	double getWidthZ() const;
 
-	virtual Vector3d getClosestPoint(const Vector3d & direction);
+	virtual Vector3d getClosestPoint(const Vector3d & direction) const;
 	virtual void print() const;
 	virtual void glDraw() const;
 };
@@ -132,10 +132,25 @@ public:
 	const VectorXd & getMasses() const;
 	size_t getNbPoints() const;
 
-	virtual Vector3d getClosestPoint(const Vector3d & direction);
+	virtual Vector3d getClosestPoint(const Vector3d & direction) const;
 	virtual void print() const;
 	virtual void glDraw() const;
 };
 
+
+class SolidUnion : public Solid
+{
+	size_t nbSolids;
+	std::vector<Solid *> solids;
+
+public:
+
+	SolidUnion(std::vector<Solid *> & solids);
+	virtual ~SolidUnion();
+
+	virtual Vector3d getClosestPoint(const Vector3d & direction) const;
+	virtual void print() const;
+	virtual void glDraw() const;
+};
 
 #endif /* PHYSICS_QUIKE_SOLID_HPP_ */

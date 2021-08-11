@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
 
 	const size_t nbPoints = 10;
-	const size_t nbRigidBodies = 10;
+	const size_t nbRigidBodies = 8;
 	const double solidSizes = 2.;
 	const Array3d center(20., 20., 3.);
 	const Array3d sigma(20., 20., 1.);
@@ -74,6 +74,21 @@ int main(int argc, char *argv[])
 		s->displace(coords);
 		qkGlobalSolidList.push_back(s);
 	}
+
+
+	Solid * sphere = new SolidSphere(1., 1.);
+	sphere->displace(Vector3d(2.,1.,0.5));
+	Solid * cuboid = new SolidCuboid(1., 1., 3., 1.);
+	cuboid->rotateX(M_PI_4);
+	cuboid->displace(Vector3d(0., sqrt(2.) * 1.5/2. + 1., sqrt(2.) * 1.5/2. - 1.));
+	cuboid->displace(Vector3d(2.,1.,0.5));
+	std::vector<Solid *> solidUnionList;
+	solidUnionList.push_back(sphere);
+	solidUnionList.push_back(cuboid);
+	Solid * total = new SolidUnion(solidUnionList);
+	total->displace(Vector3d(20., 20., 5.));
+
+	qkGlobalSolidList.push_back(total);
 
 	AabbCollisionDetector d;
 	qkGlobalAabbCollisionDetector = &d;

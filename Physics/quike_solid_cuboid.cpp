@@ -53,7 +53,7 @@ double SolidCuboid::getWidthZ() const
 }
 
 
-Vector3d SolidCuboid::getClosestPoint(const Vector3d & direction)
+Vector3d SolidCuboid::getClosestPoint(const Vector3d & direction) const
 {
 	const Vector3d rotatedDirection = rotationMatrix.transpose() * direction;
 	const Vector3d rotatedOutput = Vector3d(0.5 * widthX * ((rotatedDirection(0) >= 0.) ? 1. : -1.),
