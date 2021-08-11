@@ -5,8 +5,8 @@
  *      Author: ajuvenn
  */
 
-
 #include "quike_header.hpp"
+
 
 SolidPoints * randomRigidPoints(const Vector3d & position, double width, size_t nbPoints)
 {
@@ -21,32 +21,20 @@ SolidPoints * randomRigidPoints(const Vector3d & position, double width, size_t 
 }
 
 
-#define QK_FRAME_PERIOD 40
-
 int main(int argc, char *argv[])
 {
 	if (argc != 2){
 		fprintf(stderr, "Usage : %s bitmap_file\n", argv[0]);
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
-
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-	Player p = Player(10., 40.);
-	p.setGlobalPlayer();
 
 	if (qkLoadNewMapFromBitmap(argv[1]) == EXIT_FAILURE){
 		fprintf(stderr, "Couldn't load map from file %s\n", argv[1]);
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 
-	glutCreateWindow("Quike");
-	glutSetCursor(GLUT_CURSOR_NONE);
-	glutFullScreen();
-	glClearColor(0.0f, 0.7, 0.9, 1.0f);
-	glEnable(GL_DEPTH_TEST);
-
+	Player p = Player(10., 40.);
+	p.setGlobalPlayer();
 
 	const size_t nbPoints = 10;
 	const size_t nbRigidBodies = 8;
@@ -97,17 +85,7 @@ int main(int argc, char *argv[])
 		d.addSolid(s);
 	}
 
-	glutDisplayFunc(qkSceneRenderHandler);
-	glutPassiveMotionFunc(qkPassiveMotionEventHandler);
-	glutMotionFunc(qkMotionEventHandler);
-	glutKeyboardFunc(qkKeyboardEventHandler);
-	glutKeyboardUpFunc(qkKeyboardUpEventHandler);
-	glutReshapeFunc(qkWindowReshapeHandler);
+	qkStartGlLoop(&argc, argv);
 
-	qkInitMouseCentering();
-	qkPeriodicSceneRender(QK_FRAME_PERIOD);
-
-	glutMainLoop();
-
-	return 0;
+	return EXIT_SUCCESS;
 }

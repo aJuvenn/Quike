@@ -36,14 +36,14 @@ void SolidSphere::print() const
 	std::cout << std::endl;
 }
 
-#define QK_SPHERE_DRAW_SLICES 5
+
+#define QK_SPHERE_DRAW_SLICES 10
 
 void SolidSphere::glDraw() const
 {
 	glColor3dv(color.data());
 	glPushMatrix();
-	Matrix4d transfMatrix = getGlTransfMatrix();
-	glMultMatrixd(transfMatrix.data());
+	glMultMatrixd(getGlTransfMatrix().data());
 	glutSolidSphere(radius, QK_SPHERE_DRAW_SLICES, QK_SPHERE_DRAW_SLICES);
 	glPopMatrix();
 }

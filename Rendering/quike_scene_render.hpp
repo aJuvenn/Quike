@@ -11,10 +11,9 @@
 #include "../quike_header.hpp"
 
 
-void qkWindowReshapeHandler(int w, int h);
+#define QK_FRAME_PERIOD 40
 
-void qkSceneRenderHandler();
+void qkStartGlLoop(int * argc, char * argv[]);
 
-void qkPeriodicSceneRender(int period);
 
 #endif /* DEBUG_QUIKE_SCENE_RENDER_H_ */

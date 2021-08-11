@@ -75,3 +75,31 @@ void qkPeriodicSceneRender(int period)
 	glutPostRedisplay();
 	glutTimerFunc(period, qkPeriodicSceneRender, period);
 }
+
+
+void qkStartGlLoop(int * argc, char * argv[])
+{
+	glutInit(argc, argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+
+	glutCreateWindow("Quike");
+	glutSetCursor(GLUT_CURSOR_NONE);
+	glutFullScreen();
+	glClearColor(0.0f, 0.7, 0.9, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+
+	glutDisplayFunc(qkSceneRenderHandler);
+	glutPassiveMotionFunc(qkPassiveMotionEventHandler);
+	glutMotionFunc(qkMotionEventHandler);
+	glutKeyboardFunc(qkKeyboardEventHandler);
+	glutKeyboardUpFunc(qkKeyboardUpEventHandler);
+	glutReshapeFunc(qkWindowReshapeHandler);
+
+	qkInitMouseCentering();
+	qkPeriodicSceneRender(QK_FRAME_PERIOD);
+
+	glutMainLoop();
+}
+
+
+
